@@ -8,8 +8,9 @@ services:
     container_name: api-tests
     volumes:
       - ./:/usr/workspace
+      - allure-results:/usr/workspace/allure-results
     working_dir: /usr/workspace
-    command: /bin/sh -c "pytest test_cases_api.py --alluredir=allure-results -v"
+    command: pytest test_cases_api.py --alluredir=allure-results -v
 
   report:
     build:
@@ -18,7 +19,11 @@ services:
     container_name: allure-report
     volumes:
       - ./:/usr/workspace
+      - allure-results:/usr/workspace/allure-results
     working_dir: /usr/workspace
     command: /bin/sh -c "if [ -d allure-results ] && [ \"$(ls -A allure-results)\" ]; then allure generate allure-results --clean -o allure-report; else echo 'No results found, skipping report generation'; exit 1; fi"
     depends_on:
       - api-tests
+
+volumes:
+  allure-results:

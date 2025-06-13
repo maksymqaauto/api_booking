@@ -25,13 +25,21 @@ jobs:
       - name: Generate Allure report
         run: docker compose run --rm report
 
-      - name: Clean up containers
-        run: docker compose down
+      - name: Check Allure report folder
+        run: |
+          if [ ! -d allure-report ] || [ -z "$(ls -A allure-report)" ]; then
+            echo "No Allure report found, skipping deploy."
+            exit 1
+          fi
 
       - name: Deploy Allure Report to GitHub Pages
+        if: success()
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           folder: allure-report
           clean: true
+
+      - name: Clean up containers
+        run: docker compose down
