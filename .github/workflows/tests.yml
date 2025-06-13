@@ -19,10 +19,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run tests and generate Allure report
-        run: |
-          docker compose up --abort-on-container-exit --exit-code-from api-tests
-          docker compose up report
+      - name: Run API tests
+        run: docker compose up --abort-on-container-exit --exit-code-from api-tests
+
+      - name: Generate Allure report
+        run: docker compose run --rm report
+
+      - name: Clean up containers
+        run: docker compose down
 
       - name: Deploy Allure Report to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.5
