@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+*.sqlite3
+
+# Virtual env
+env/
+venv/
+.venv/
+
+# Pytest
+.pytest_cache/
+.cache/
+*.cover
+.coverage
+coverage.xml
+htmlcov/
+
+# Allure
+allure-results/
+allure-report/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Docker
+*.pid
+*.pid.lock
+docker-compose.override.yml
+
+# Logs
+logs/
+*.log
+
+# Test artifacts
+screenshots/
+tmp/
+output/
