@@ -10,7 +10,7 @@ services:
       - ./:/usr/workspace
       - allure-results:/usr/workspace/allure-results
     working_dir: /usr/workspace
-    command: pytest test_cases_api.py --alluredir=allure-results -v
+    command: pytest tests/api_tests/ --alluredir=allure-results -v
 
   report:
     build:
