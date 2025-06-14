@@ -1,45 +1,56 @@
-name: API Tests
+name: UI Tests
 
 on:
-  workflow_dispatch:
-    inputs:
-      STAGE:
-        description: "Test environment"
-        required: true
-        default: "prod"
   push:
-    branches:
-      - main
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  run-tests:
+  tests:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run API tests
-        run: docker compose up --abort-on-container-exit --exit-code-from api-tests
-
-      - name: Generate Allure report
-        run: docker compose run --rm report
-
-      - name: Check Allure report folder
-        run: |
-          if [ ! -d allure-report ] || [ -z "$(ls -A allure-report)" ]; then
-            echo "No Allure report found, skipping deploy."
-            exit 1
-          fi
-
-      - name: Deploy Allure Report to GitHub Pages
-        if: success()
-        uses: JamesIves/github-pages-deploy-action@4.1.5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: gh-pages
-          folder: allure-report
-          clean: true
+          python-version: 3.11
 
-      - name: Clean up containers
-        run: docker compose down
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        id: run-tests
+        run: |
+          pytest --alluredir=allure-results
+        continue-on-error: true
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: screenshots
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs
+          path: logs
+
+      - name: Fail job if tests failed
+        if: steps.run-tests.outcome == 'failure'
+        run: exit 1
