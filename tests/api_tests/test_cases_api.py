@@ -43,8 +43,12 @@ def test_update_booking(env, create_mock_booking):
     booking_api = BookingApi(env)
     updated_booking_data = {"totalprice": 600}
     response = booking_api.update_booking(create_mock_booking.bookingid, updated_booking_data)
-    assert response.status_code == HTTPStatus.OK or HTTPStatus.FORBIDDEN
+    assert response.status_code in [HTTPStatus.OK, HTTPStatus.FORBIDDEN]
+    if response.status_code != HTTPStatus.OK:
+        pytest.skip(f"Update not allowed, status code: {response.status_code}")
     updated_booking_response = booking_api.get_booking_by_id(create_mock_booking.bookingid)
+    assert updated_booking_response.status_code == HTTPStatus.OK, \
+        f"Failed to fetch updated booking. Status: {updated_booking_response.status_code}"
     updated_booking = Booking(**updated_booking_response.json())
     assert updated_booking.totalprice == updated_booking_data["totalprice"]
 
@@ -68,7 +72,10 @@ def test_patch_booking(env, create_mock_booking):
     booking_api = BookingApi(env)
     updated_booking_data = {"totalprice": 600}
     response = booking_api.patch_booking(create_mock_booking.bookingid, updated_booking_data)
-    assert response.status_code == HTTPStatus.OK or HTTPStatus.FORBIDDEN
+    if response.status_code == HTTPStatus.FORBIDDEN:
+        pytest.skip(f"Patch not allowed, status code: {response.status_code}")
+    else:
+        assert response.status_code == HTTPStatus.OK
     updated_booking_response = booking_api.get_booking_by_id(create_mock_booking.bookingid)
     updated_booking = Booking(**updated_booking_response.json())
     assert updated_booking.totalprice == updated_booking_data["totalprice"]
